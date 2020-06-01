@@ -1,7 +1,7 @@
 # See who's into you on Facebook 😜
 
 ## Instructions
-1. Go to https://www.facebook.com/dyi to download your Facebook data. 
+1. Go to https://www.facebook.com/dyi. 
 
 2. Select only the "Messages" data and request the data.
 
