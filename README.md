@@ -22,5 +22,5 @@ pip install -r requirements.txt
 
 7. Run the bulk analyzer
 ```
-python main.py analyze_directory messages/
+python main.py analyze_directory <path_to_your_messages_directory>
 ```
