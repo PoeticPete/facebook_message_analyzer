@@ -12,7 +12,7 @@
 
 5. Clone this repo
 ```
-git clone 
+git clone https://github.com/PoeticPete/facebook_message_analyzer.git
 ```
 
 6. Install requirements (use Python3)
