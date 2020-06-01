@@ -8,20 +8,26 @@ SECONDS_TO_NEW_CONVERSATION = 14400 # 4 hours
 
 class Analyzer:
     message_data = None
+    error = None
 
     def __init__(self, message_file):
         if not os.path.exists(message_file):
-            print(f'{message_file} does not exist')
-            exit()
+            self.error = f'{message_file} does not exist'
             return
 
         with open(message_file) as f:
             self.message_data = json.load(f)
 
-        if len(self.participants) != 2:
-            print(f'There must be exactly 2 participants in the conversation.')
-            exit()
+        # Go through each message to count participants b/c particpants can leave
+        participants = set()
+        
+        for m in self.messages:
+            participants.add(m['sender_name'])
+        if len(participants) != 2 or len(self.participants) != 2:
+            self.error = f'There must be exactly 2 participants in the conversation.'
             return
+
+
 
     @property
     def messages(self):
@@ -243,5 +249,6 @@ class Analyzer:
 
 def analyze(message_file):
     analyzer = Analyzer(message_file)
+    if analyzer.error:
+        return
     print(analyzer.get_summary())
-    
