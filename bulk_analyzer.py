@@ -69,7 +69,6 @@ class BulkAnalyzer:
             for k in scores:
                 if k != self.current_user_name:
                     results.append(f'{k} is {amount_into_percentage}% into you')
-                    print(analyzer.message_file)
                     print(f'{k} is {amount_into_percentage}% into you')
                     
         return results
