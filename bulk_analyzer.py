@@ -19,10 +19,10 @@ class BulkAnalyzer:
             exit()
             return
         for directory in os.walk(f'{directory_path}/inbox/'):
-            for f in os.walk(directory[0]):
-                if 'message_1.json' in f[2]:
-                    message_file = f'{f[0]}/message_1.json'
-                    self.message_file_paths.append(message_file)
+            if 'message_1.json' in directory[2]:
+                message_file = f'{directory[0]}/message_1.json'
+                self.message_file_paths.append(message_file)
+
 
     @property
     def current_user_name(self):
@@ -69,9 +69,12 @@ class BulkAnalyzer:
             for k in scores:
                 if k != self.current_user_name:
                     results.append(f'{k} is {amount_into_percentage}% into you')
+                    print(analyzer.message_file)
+                    print(f'{k} is {amount_into_percentage}% into you')
+                    
         return results
 
 def analyze_bulk(directory_path, minimum_messages=20):
     bulk_analyzer = BulkAnalyzer(directory_path)
     for result in bulk_analyzer.get_analysis():
-        print(result)
+        pass

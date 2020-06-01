@@ -9,8 +9,10 @@ SECONDS_TO_NEW_CONVERSATION = 14400 # 4 hours
 class Analyzer:
     message_data = None
     error = None
+    message_file = None
 
     def __init__(self, message_file):
+        self.message_file = message_file
         if not os.path.exists(message_file):
             self.error = f'{message_file} does not exist'
             return
@@ -19,14 +21,18 @@ class Analyzer:
             self.message_data = json.load(f)
 
         # Go through each message to count participants b/c particpants can leave
-        participants = set()
         
-        for m in self.messages:
-            participants.add(m['sender_name'])
-        if len(participants) != 2 or len(self.participants) != 2:
+
+        if len(self.participants) != 2:
             self.error = f'There must be exactly 2 participants in the conversation.'
             return
 
+        participants = set([self.participants[0]['name'], self.participants[1]['name']])
+
+        for m in self.messages:
+            if m['sender_name'] not in participants:
+                self.error = f"{m['sender_name']} sent a message in a conversation between {participants}."
+                return
 
 
     @property
@@ -250,5 +256,6 @@ class Analyzer:
 def analyze(message_file):
     analyzer = Analyzer(message_file)
     if analyzer.error:
+        print(analyzer.error)
         return
     print(analyzer.get_summary())
