@@ -64,16 +64,17 @@ class BulkAnalyzer:
             
         analyzers.sort(key=lambda analyzer: get_amount_into(analyzer, self.current_user_name), reverse=True)
         for analyzer in analyzers:
-            scores = analyzer.get_scores()
-            amount_into_percentage = get_amount_into(analyzer, self.current_user_name) * 100
-            for k in scores:
-                if k != self.current_user_name:
-                    results.append(f'{k} is {amount_into_percentage}% into you')
-                    print(f'{k} is {amount_into_percentage}% into you')
+            results.append(analyzer.get_amount_into_text())
+            # scores = analyzer.get_scores()
+            # amount_into_percentage = get_amount_into(analyzer, self.current_user_name) * 100
+            # for k in scores:
+            #     if k != self.current_user_name:
+            #         results.append(f'{k} is {amount_into_percentage}% into you')
+            #         print(f'{k} is {amount_into_percentage}% into you')
                     
         return results
 
 def analyze_bulk(directory_path, minimum_messages=20):
     bulk_analyzer = BulkAnalyzer(directory_path)
     for result in bulk_analyzer.get_analysis():
-        pass
+        print(result)

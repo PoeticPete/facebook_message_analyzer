@@ -135,7 +135,7 @@ class Analyzer:
         result[self.participants[1]['name']] = b
         return result
 
-    def get_90_percentile_response_time_data(self):
+    def get_80_percentile_response_time_data(self):
         participant_a = self.participants[0]['name']
         participant_b = self.participants[1]['name']
 
@@ -175,8 +175,8 @@ class Analyzer:
         numpy_arr_a = np.array(millisecond_differences_a)
         numpy_arr_b = np.array(millisecond_differences_b)
 
-        a_percentile = np.percentile(numpy_arr_a, 90) if len(millisecond_differences_a) > 0 else 0
-        b_percentile = np.percentile(numpy_arr_b, 90) if len(millisecond_differences_b) > 0 else 0
+        a_percentile = np.percentile(numpy_arr_a, 75) if len(millisecond_differences_a) > 0 else 0
+        b_percentile = np.percentile(numpy_arr_b, 75) if len(millisecond_differences_b) > 0 else 0
 
         result = {}
         result[self.participants[0]['name']] = a_percentile
@@ -191,71 +191,78 @@ class Analyzer:
         scores[participant_b] = 0
 
         data = self.get_who_started_conversation_data()
-        if data[participant_a] > data[participant_b]:
-            scores[participant_b] += 1
-        elif data[participant_a] == data[participant_b]:
-            pass
-        else:
-            scores[participant_a] += 1
+        result = apply_gradient(data)
+        scores[participant_a] += result[participant_b]
+        scores[participant_b] += result[participant_a]
         
         data = self.get_who_spoke_last_data()
-        if data[participant_a] > data[participant_b]:
-            scores[participant_b] += 1
-        elif data[participant_a] == data[participant_b]:
-            pass
-        else:
-            scores[participant_a] += 1
+        result = apply_gradient(data)
+        scores[participant_a] += result[participant_b]
+        scores[participant_b] += result[participant_a]
 
         data = self.get_75_percentile_length_text_data()
-        if data[participant_a] > data[participant_b]:
-            scores[participant_b] += 1
-        elif data[participant_a] == data[participant_b]:
-            pass
-        else:
-            scores[participant_a] += 1
+        result = apply_gradient(data)
+        scores[participant_a] += result[participant_b]
+        scores[participant_b] += result[participant_a]
 
         data = self.get_questions_asked_data()
-        if data[participant_a] > data[participant_b]:
-            scores[participant_b] += 1
-        elif data[participant_a] == data[participant_b]:
-            pass
-        else:
-            scores[participant_a] += 1
+        result = apply_gradient(data)
+        scores[participant_a] += result[participant_b]
+        scores[participant_b] += result[participant_a]
 
-        data = self.get_90_percentile_response_time_data()
-        if data[participant_a] > data[participant_b]:
-            scores[participant_a] += 1
-        elif data[participant_a] == data[participant_b]:
-            pass
-        else:
-            scores[participant_b] += 1
+        data = self.get_80_percentile_response_time_data()
+        result = apply_gradient(data)
+        scores[participant_a] += result[participant_a]
+        scores[participant_b] += result[participant_b]
 
         return scores
-
-    def get_summary(self):
-        participant_a = self.participants[0]['name']
-        participant_b = self.participants[1]['name']
-        scores = self.get_scores()
-        total = scores[participant_a] + scores[participant_b]
-        if scores[participant_a] > scores[participant_b]:
-            return f'{participant_b} is into {participant_a} more'
-        elif scores[participant_a] < scores[participant_b]:
-            return f'{participant_a} is into {participant_b} more'
-        else:
-            return f'{participant_a} and {participant_b} are into each other equally'
 
     def print_all_results(self):
         print(f'Who started convos more? {self.get_who_started_conversation_data()}')
         print(f'Who spoke last more? {self.get_who_spoke_last_data()}')
         print(f'75 percentile length text: {self.get_75_percentile_length_text_data()}')
         print(f'Questions asked: {self.get_questions_asked_data()}')
-        print(f'90 percentile response times: {self.get_90_percentile_response_time_data()}')
+        print(f'80 percentile response times: {self.get_80_percentile_response_time_data()}')
+
+    def get_amount_into_text(self):
+        participant_a = self.participants[0]['name']
+        participant_b = self.participants[1]['name']
+        scores = self.get_scores()
+        total = 0
+        for k, v in scores.items():
+            total += v
+        if total == 0:
+            return 0.5
+        middle = total / 2
+        crush_percentage = int(round(abs(middle - scores[participant_a]) / middle * 100))
+        if crush_percentage == 0:
+            return f'{participant_a} and {participant_b} are equally into each other'
+        elif scores[participant_a] - middle > 0:
+            return f'{participant_b} is {crush_percentage}% more into {participant_a}'
+        else:
+            return f'{participant_a} is {crush_percentage}% more into {participant_b}'
 
 
+def apply_gradient(data):
+    """
+    Takes a scores like {'foo': 1, 'bar': 3} and converts it into
+    {'foo': 0.25, 'bar': 0.75}
+    """
+    total = 0
+    result = data.copy()
+    for v in data.values():
+        total += v
+    for k in result:
+        if total == 0:
+            result[k] = 0
+            continue
+        result[k] /= total
+    return result
 
 def analyze(message_file):
     analyzer = Analyzer(message_file)
     if analyzer.error:
         print(analyzer.error)
         return
-    print(analyzer.get_summary())
+    print(analyzer.get_amount_into_text())
+    analyzer.print_all_results()
