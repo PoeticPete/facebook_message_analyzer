@@ -71,6 +71,12 @@ class BulkAnalyzer:
             #     if k != self.current_user_name:
             #         results.append(f'{k} is {amount_into_percentage}% into you')
             #         print(f'{k} is {amount_into_percentage}% into you')
+
+
+        results.append('\nYour most common conversations are: ')
+        analyzers.sort(key=lambda analyzer: len(analyzer.conversations), reverse=True)
+        for analyzer in analyzers[:10]:
+            results.append(analyzer.get_amount_into_text())
                     
         return results
 

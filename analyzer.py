@@ -236,11 +236,13 @@ class Analyzer:
         middle = total / 2
         crush_percentage = int(round(abs(middle - scores[participant_a]) / middle * 100))
         if crush_percentage == 0:
-            return f'{participant_a} and {participant_b} are equally into each other'
+            message = f'{participant_a} and {participant_b} are equally into each other'
         elif scores[participant_a] - middle > 0:
-            return f'{participant_b} is {crush_percentage}% more into {participant_a}'
+            message = f'{participant_b} is {crush_percentage}% more into {participant_a}'
         else:
-            return f'{participant_a} is {crush_percentage}% more into {participant_b}'
+            message = f'{participant_a} is {crush_percentage}% more into {participant_b}'
+
+        return message + f' ({len(self.conversations)} conversations)'
 
 
 def apply_gradient(data):
